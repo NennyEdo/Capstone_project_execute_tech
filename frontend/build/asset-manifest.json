@@ -1,0 +1,43 @@
+{
+  "files": {
+    "main.css": "/static/css/main.4e0b5ce8.css",
+    "main.js": "/static/js/main.90e30ce7.js",
+    "static/js/488.c48de6e1.chunk.js": "/static/js/488.c48de6e1.chunk.js",
+    "static/media/blogbg.png": "/static/media/blogbg.6bc1d2df054d143061cc.png",
+    "static/media/About.png": "/static/media/About.6803061c21888bf97abb.png",
+    "static/media/execcutetechherobg.jpg": "/static/media/execcutetechherobg.c4176cc286ca9a760e34.jpg",
+    "static/media/img1.png": "/static/media/img1.e471c491b6f8bb5a240b.png",
+    "static/media/img.png": "/static/media/img.67edb93ac3495b805fc1.png",
+    "static/media/devops.png": "/static/media/devops.61c030fda13840d534e4.png",
+    "static/media/VisionImage.png": "/static/media/VisionImage.d9cf779458ce30213452.png",
+    "static/media/img2.png": "/static/media/img2.9bdeace303488b145435.png",
+    "static/media/MissionImage.png": "/static/media/MissionImage.5d6d827c6843695b9f45.png",
+    "static/media/zerotohero.png": "/static/media/zerotohero.380052fe555befd078a6.png",
+    "static/media/registerbg.png": "/static/media/registerbg.e87259ff650ad72043bf.png",
+    "static/media/cyber1.png": "/static/media/cyber1.44ebeb198017ef803bec.png",
+    "static/media/essential.png": "/static/media/essential.d91f6b40e0c13b4d978b.png",
+    "static/media/techfuture.png": "/static/media/techfuture.54290e4d3a4a4d385252.png",
+    "static/media/mistakes.png": "/static/media/mistakes.3d28b1ae2333d5d38c44.png",
+    "static/media/samson.png": "/static/media/samson.fbec7ae83cc2451737f7.png",
+    "static/media/Linux.jpg": "/static/media/Linux.94a34557de2e4b15b89d.jpg",
+    "static/media/lekan.png": "/static/media/lekan.794b9b93c966a4d0e8e6.png",
+    "static/media/adebukola.png": "/static/media/adebukola.8632927ba358b3c7f187.png",
+    "static/media/front-end.jpg": "/static/media/front-end.de05e907e1ec8eed07b0.jpg",
+    "static/media/software.jpg": "/static/media/software.5f9c28fd673c88d13f93.jpg",
+    "static/media/cloud-engineering.jpg": "/static/media/cloud-engineering.582a9f43262b5640b551.jpg",
+    "static/media/Rachel.jpg": "/static/media/Rachel.c79a7f82275504ef67f8.jpg",
+    "static/media/data.png": "/static/media/data.4ff2b31327d5db8ae43c.png",
+    "static/media/Lukman.jpg": "/static/media/Lukman.b9e743ac6fc7fda3ee25.jpg",
+    "static/media/Lilian.jpg": "/static/media/Lilian.f557ac60b3ed04365549.jpg",
+    "static/media/manwalkingbg.png": "/static/media/manwalkingbg.1979ca2869dff70e092d.png",
+    "static/media/Kudirat.jpg": "/static/media/Kudirat.4e4dd8a6604d9a8eb2f4.jpg",
+    "index.html": "/index.html",
+    "main.4e0b5ce8.css.map": "/static/css/main.4e0b5ce8.css.map",
+    "main.90e30ce7.js.map": "/static/js/main.90e30ce7.js.map",
+    "488.c48de6e1.chunk.js.map": "/static/js/488.c48de6e1.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.4e0b5ce8.css",
+    "static/js/main.90e30ce7.js"
+  ]
+}
