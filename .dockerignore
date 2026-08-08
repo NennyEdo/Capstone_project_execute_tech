@@ -1,5 +1,7 @@
 node_modules
+frontend/node_modules
 build
+frontend/build
 .git
 .gitignore
 *.md
