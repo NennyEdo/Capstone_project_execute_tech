@@ -191,3 +191,37 @@ resource "aws_vpc_security_group_egress_rule" "rds_all" {
   cidr_ipv4          = "0.0.0.0/0"
   ip_protocol        = "-1"
 }
+
+# Configure private PostgreSQL 16 database
+# RDS SUBNET GROUP, this tells RDS which subnets it can use
+resource "aws_db_subnet_group" "main" {
+  name       = "capstone-db-subnet-group"
+  subnet_ids = [aws_subnet.private_a.id, aws_subnet.private_b.id]
+
+  tags = {
+    Name = "capstone-db-subnet-group"
+  }
+}
+
+# ============================================
+# RDS INSTANCE — PostgreSQL 16, private, password auto-managed by AWS
+# ============================================
+
+resource "aws_db_instance" "main" {
+  identifier                  = "capstone-db"
+  engine                      = "postgres"
+  engine_version               = "16"
+  instance_class                = "db.t3.micro"
+  allocated_storage            = 20
+  db_name                       = "capstonedb"
+  username                      = "capstoneadmin"
+  manage_master_user_password  = true
+  db_subnet_group_name          = aws_db_subnet_group.main.name
+  vpc_security_group_ids        = [aws_security_group.rds.id]
+  publicly_accessible           = false
+  skip_final_snapshot           = true
+
+  tags = {
+    Name = "capstone-db"
+  }
+}
