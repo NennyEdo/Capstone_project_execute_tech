@@ -225,3 +225,16 @@ resource "aws_db_instance" "main" {
     Name = "capstone-db"
   }
 }
+
+# Configure ECR REPOSITORIES
+
+# Repository 1: project's 1 website image (WDocker image storage location)
+resource "aws_ecr_repository" "website" {
+  name = "capstone-website"
+}
+
+
+# Repository 2: Project 2's app image
+resource "aws_ecr_repository" "project2_app" {
+  name = "capstone-project2-app"
+}
