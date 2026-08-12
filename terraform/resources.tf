@@ -342,4 +342,48 @@ resource "aws_ecs_service" "website" {
     security_groups  = [aws_security_group.ecs.id]
     assign_public_ip = false
   }
+
+
+# Target group
+
+  load_balancer {
+    target_group_arn = aws_lb_target_group.website.arn
+    container_name    = "website"
+    container_port    = 80
+  }
+
+  depends_on = [aws_lb_listener.http]
+}
+
+# APPLICATION LOAD BALANCER
+
+resource "aws_lb" "main" {
+  name               = "capstone-alb"
+  internal            = false
+  load_balancer_type = "application"
+  security_groups     = [aws_security_group.alb.id]
+  subnets             = [aws_subnet.public_a.id, aws_subnet.public_b.id]
+}
+
+resource "aws_lb_target_group" "website" {
+  name        = "capstone-website-tg"
+  port         = 80
+  protocol    = "HTTP"
+  vpc_id      = aws_vpc.my-vpc.id
+  target_type = "ip"
+
+  health_check {
+    path = "/"
+  }
+}
+
+resource "aws_lb_listener" "http" {
+  load_balancer_arn = aws_lb.main.arn
+  port                = 80
+  protocol           = "HTTP"
+
+  default_action {
+    type              = "forward"
+    target_group_arn  = aws_lb_target_group.website.arn
+  }
 }
