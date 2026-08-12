@@ -238,3 +238,58 @@ resource "aws_ecr_repository" "website" {
 resource "aws_ecr_repository" "project2_app" {
   name = "capstone-project2-app"
 }
+
+
+
+#Configure IAM Role
+# Assume_role_policy,a trust policy that allows only ECS to pull images from ECR
+# IAM: TASK EXECUTION ROLE
+
+resource "aws_iam_role" "ecs_task_execution_role" {
+  name = "capstone-ecs-task-execution-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action    = "sts:AssumeRole"
+      Effect    = "Allow"
+      Principal = {
+        Service = "ecs-tasks.amazonaws.com"
+      }
+    }]
+  })
+}
+
+
+# Attach AmazonECSTaskExecutionRolePolicy
+resource "aws_iam_role_policy_attachment" "ecs_task_execution_policy" {
+  role       = aws_iam_role.ecs_task_execution_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}
+
+
+# IAM: TASK ROLE
+# Used by a running application/container
+
+resource "aws_iam_role" "ecs_task_role" {
+  name = "capstone-ecs-task-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action    = "sts:AssumeRole"
+      Effect    = "Allow"
+      Principal = {
+        Service = "ecs-tasks.amazonaws.com"
+      }
+    }]
+  })
+}
+
+
+
+# Attach AWS Systems Manager (SSM) policy
+resource "aws_iam_role_policy_attachment" "ecs_task_ssm_policy" {
+  role       = aws_iam_role.ecs_task_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
