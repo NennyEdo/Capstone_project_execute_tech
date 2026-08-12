@@ -3,3 +3,5 @@ terraform/terraform.tfstate
 terraform/terraform.tfstate.backup
 *.tfstate
 *.tfstate.backup
+state-bootstrap/.terraform/
+terraform/.terraform/
