@@ -293,3 +293,53 @@ resource "aws_iam_role_policy_attachment" "ecs_task_ssm_policy" {
   role       = aws_iam_role.ecs_task_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
+
+
+# CONFIGURE ECS CLUSTER
+
+resource "aws_ecs_cluster" "main" {
+  name = "capstone-cluster"
+}
+
+
+# ECS TASK DEFINITION 
+resource "aws_ecs_task_definition" "website" {
+  family                   = "capstone-website-task"
+  requires_compatibilities = ["FARGATE"]
+  network_mode             = "awsvpc"
+  cpu                      = "256"
+  memory                   = "512"
+  execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
+  task_role_arn             = aws_iam_role.ecs_task_role.arn
+
+  container_definitions = jsonencode([
+    {
+      name  = "website"
+      image = "${aws_ecr_repository.website.repository_url}:latest"
+      portMappings = [
+        {
+          containerPort = 80
+          protocol      = "tcp"
+        }
+      ]
+    }
+  ])
+}
+
+
+# ECS SERVICE 
+
+resource "aws_ecs_service" "website" {
+  name                   = "capstone-website-service"
+  cluster                 = aws_ecs_cluster.main.id
+  task_definition         = aws_ecs_task_definition.website.arn
+  desired_count           = 1
+  launch_type              = "FARGATE"
+  enable_execute_command  = true
+
+  network_configuration {
+    subnets          = [aws_subnet.private_a.id, aws_subnet.private_b.id]
+    security_groups  = [aws_security_group.ecs.id]
+    assign_public_ip = false
+  }
+}
