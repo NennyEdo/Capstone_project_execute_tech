@@ -33,7 +33,10 @@ resource "aws_subnet" "private_b" {
   availability_zone  = "eu-north-1b"
 }
 
-# Add Internet Gateway 
+# ============================================
+# NETWORKING: INTERNET GATEWAY, NAT, ROUTE TABLES
+# ============================================
+
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.my-vpc.id
 
@@ -42,7 +45,6 @@ resource "aws_internet_gateway" "igw" {
   }
 }
 
-# Public route table 
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.my-vpc.id
 
@@ -56,7 +58,6 @@ resource "aws_route_table" "public" {
   }
 }
 
-# Associate public route table with both public subnets
 resource "aws_route_table_association" "public_a" {
   subnet_id      = aws_subnet.public_a.id
   route_table_id = aws_route_table.public.id
@@ -67,7 +68,6 @@ resource "aws_route_table_association" "public_b" {
   route_table_id = aws_route_table.public.id
 }
 
-# Elastic IP for the NAT Gateway
 resource "aws_eip" "nat" {
   domain = "vpc"
 
@@ -76,7 +76,6 @@ resource "aws_eip" "nat" {
   }
 }
 
-# NAT Gateway — sits in a public subnet, lets private subnets reach the internet
 resource "aws_nat_gateway" "nat" {
   allocation_id = aws_eip.nat.id
   subnet_id     = aws_subnet.public_a.id
@@ -88,7 +87,6 @@ resource "aws_nat_gateway" "nat" {
   depends_on = [aws_internet_gateway.igw]
 }
 
-# Private route table — routes private subnet traffic through the NAT Gateway
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.my-vpc.id
 
@@ -102,7 +100,6 @@ resource "aws_route_table" "private" {
   }
 }
 
-# Associate private route table with both private subnets
 resource "aws_route_table_association" "private_a" {
   subnet_id      = aws_subnet.private_a.id
   route_table_id = aws_route_table.private.id
@@ -111,4 +108,86 @@ resource "aws_route_table_association" "private_a" {
 resource "aws_route_table_association" "private_b" {
   subnet_id      = aws_subnet.private_b.id
   route_table_id = aws_route_table.private.id
+}
+
+# Configure SECURITY GROUP 1: ALB 
+# Allows Anyone on the internet access
+
+resource "aws_security_group" "alb" {
+  name        = "capstone-alb-sg"
+  description = "Allow HTTP/HTTPS from internet"
+  vpc_id      = aws_vpc.my-vpc.id   # this firewall belongs to our VPC
+}
+
+# Rule: allow anyone (0.0.0.0/0) to reach the ALB on port 80 (HTTP)
+resource "aws_vpc_security_group_ingress_rule" "alb_http" {
+  security_group_id = aws_security_group.alb.id   # attach this rule to the ALB firewall
+  cidr_ipv4          = "0.0.0.0/0"                  # 0.0.0.0/0 = literally everyone
+  from_port          = 80
+  to_port             = 80
+  ip_protocol        = "tcp"
+}
+
+# Rule: allow anyone to reach the ALB on port 443 (HTTPS) too
+resource "aws_vpc_security_group_ingress_rule" "alb_https" {
+  security_group_id = aws_security_group.alb.id
+  cidr_ipv4          = "0.0.0.0/0"
+  from_port          = 443
+  to_port             = 443
+  ip_protocol        = "tcp"
+}
+
+# Rule: allow the ALB to send traffic OUT to anywhere 
+resource "aws_vpc_security_group_egress_rule" "alb_all" {
+  security_group_id = aws_security_group.alb.id
+  cidr_ipv4          = "0.0.0.0/0"
+  ip_protocol        = "-1"   # -1 means "all protocols/ports"
+}
+
+
+# SECURITY GROUP 2: ECS (where the app runs, allows traffic from ALB to ECS)
+
+resource "aws_security_group" "ecs" {
+  name        = "capstone-ecs-sg"
+  description = "Allow traffic only from ALB"
+  vpc_id      = aws_vpc.my-vpc.id
+}
+
+# Rule: allow traffic ONLY if it's coming from the ALB security group
+resource "aws_vpc_security_group_ingress_rule" "ecs_from_alb" {
+  security_group_id            = aws_security_group.ecs.id   
+  referenced_security_group_id = aws_security_group.alb.id   
+  from_port                    = 80
+  to_port                       = 80
+  ip_protocol                  = "tcp"
+}
+
+# Rule: allow ECS to send traffic out anywhere (e.g. to pull images, call AWS APIs)
+resource "aws_vpc_security_group_egress_rule" "ecs_all" {
+  security_group_id = aws_security_group.ecs.id
+  cidr_ipv4          = "0.0.0.0/0"
+  ip_protocol        = "-1"
+}
+
+# SECURITY GROUP 3: RDS (Database) allows traffic from ECS to Database
+resource "aws_security_group" "rds" {
+  name        = "capstone-rds-sg"
+  description = "Allow traffic only from ECS"
+  vpc_id      = aws_vpc.my-vpc.id
+}
+
+# Rule: allow traffic ONLY if it's coming from the ECS security group, "connection" between ECS and RDS
+resource "aws_vpc_security_group_ingress_rule" "rds_from_ecs" {
+  security_group_id            = aws_security_group.rds.id   
+  referenced_security_group_id = aws_security_group.ecs.id   
+  from_port                    = 5432                          # 5432 = PostgreSQL's default port
+  to_port                       = 5432
+  ip_protocol                  = "tcp"
+}
+
+# Rule: allow RDS to send traffic out anywhere (usually for updates/patches)
+resource "aws_vpc_security_group_egress_rule" "rds_all" {
+  security_group_id = aws_security_group.rds.id
+  cidr_ipv4          = "0.0.0.0/0"
+  ip_protocol        = "-1"
 }
