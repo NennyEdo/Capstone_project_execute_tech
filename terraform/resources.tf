@@ -228,15 +228,17 @@ resource "aws_db_instance" "main" {
 
 # Configure ECR REPOSITORIES
 
-# Repository 1: project's 1 website image (WDocker image storage location)
+# Repository 1: project's 1 website image (Docker image storage location)
 resource "aws_ecr_repository" "website" {
-  name = "capstone-website"
+  name         = "capstone-website"
+  force_delete = true
 }
 
 
 # Repository 2: Project 2's app image
 resource "aws_ecr_repository" "project2_app" {
-  name = "capstone-project2-app"
+  name         = "capstone-project2-app"
+  force_delete = true
 }
 
 
@@ -386,4 +388,80 @@ resource "aws_lb_listener" "http" {
     type              = "forward"
     target_group_arn  = aws_lb_target_group.website.arn
   }
+}
+
+# CONFIGURE OIDC: Builds Trust between GitHub Actions and AWS and allows Authentication to AWS using OIDC
+
+resource "aws_iam_openid_connect_provider" "github" {
+  url             = "https://token.actions.githubusercontent.com"
+  client_id_list  = ["sts.amazonaws.com"]
+  thumbprint_list = ["6938fd4d98bab03faadb97b34396831e3780aea1"]
+}
+
+
+# IAM ROLE: GitHub Actions assumes this role via OIDC
+
+resource "aws_iam_role" "github_actions" {
+  name = "capstone-github-actions-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect    = "Allow"
+      Principal = {
+        Federated = aws_iam_openid_connect_provider.github.arn
+      }
+      Action    = "sts:AssumeRoleWithWebIdentity"
+      Condition = {
+        StringEquals = {
+          "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
+        }
+        StringLike = {
+          "token.actions.githubusercontent.com:sub" = "repo:NennyEdo/Capstone_project_execute_tech:*"
+        }
+      }
+    }]
+  })
+}
+
+# Permissions this role needs: push to ECR, update ECS
+resource "aws_iam_role_policy" "github_actions_policy" {
+  name = "capstone-github-actions-policy"
+  role = aws_iam_role.github_actions.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ecr:GetAuthorizationToken",
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:PutImage",
+          "ecr:InitiateLayerUpload",
+          "ecr:UploadLayerPart",
+          "ecr:CompleteLayerUpload"
+        ]
+        Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "ecs:RegisterTaskDefinition",
+          "ecs:UpdateService",
+          "ecs:DescribeServices",
+          "ecs:DescribeTaskDefinition"
+        ]
+        Resource = "*"
+      },
+      {
+        Effect   = "Allow"
+        Action   = "iam:PassRole"
+        Resource = [
+          aws_iam_role.ecs_task_execution_role.arn,
+          aws_iam_role.ecs_task_role.arn
+        ]
+      }
+    ]
+  })
 }
