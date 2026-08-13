@@ -5,3 +5,5 @@ terraform/terraform.tfstate.backup
 *.tfstate.backup
 state-bootstrap/.terraform/
 terraform/.terraform/
+*.exe
+*.msi
