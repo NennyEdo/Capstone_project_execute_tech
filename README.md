@@ -6,11 +6,12 @@ Deploying frontend and backend website through using github Action pipeline AWS 
 ## 1. Setting up environment Locally with Docker  (Stage 1)
 
 Before touching AWS, the React website was built and run locally in Docker to
-confirm that Dockerfile and nginx configuration worked correctly.
+confirm that Docker file and nginx configuration worked correctly using http://127.0.0.1:8080.
 
-```bash
-docker build --build-arg REACT_APP_API_URL=http://localhost:8080 -t eta-web .
-docker run -p 8080:80 eta-web
+<img width="1330" height="662" alt="image" src="https://github.com/user-attachments/assets/b969a522-042d-442a-8021-e95909c879e5" />
+
+```
+
 ```
 
 **Homepage loading locally via Docker:**
