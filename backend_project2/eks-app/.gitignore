@@ -1,0 +1,18 @@
+backend_project2/eks-app/node_modules/
+backend_project2/terraform/.terraform/
+backend_project2/terraform/terraform.tfstate
+backend_project2/terraform/terraform.tfstate.backup
+backend_project2/terraform/*.tfstate.*.backup
+# Node
+node_modules/
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+crash.log
+*.tfvars
+
+# Secrets
+backend_project2/k8s/secret.yaml

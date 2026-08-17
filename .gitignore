@@ -1,9 +1,14 @@
-terraform/.terraform/
-terraform/terraform.tfstate
-terraform/terraform.tfstate.backup
+﻿# Node
+node_modules/
+
+# Terraform
+.terraform/
 *.tfstate
+*.tfstate.*
 *.tfstate.backup
-state-bootstrap/.terraform/
-terraform/.terraform/
+crash.log
+*.tfvars
+
+# Windows
 *.exe
 *.msi
