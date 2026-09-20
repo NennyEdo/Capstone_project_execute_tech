@@ -525,12 +525,121 @@ GitHub's documented setup exactly. To be revisited with more time.
 
 ## Rebuild / Destroy
 
-See `RUNBOOK-rebuild-and-verify.md` for the full step-by-step sequence to
-tear down and rebuild this infrastructure from scratch, including all
-verification and testing commands.
+Confirm these are installed and configured:
+```bash
+aws --version
+terraform --version
+docker --version
+kubectl version --client
+```
+Confirm AWS credentials work:
+```bash
+aws sts get-caller-identity
+```
+
+---
+
+## Stage 1 — Terraform State Backend (bootstrap)
+
+Only needed if `state-bootstrap` was also destroyed — normally this stays
+up permanently and you can skip to Stage 2.
 
 ```bash
-cd terraform
-terraform destroy   # tear down
-terraform apply     # rebuild
+cd state-bootstrap
+terraform init
+terraform apply
 ```
+Type `yes` when prompted. Creates the S3 bucket (`nenny-s3-capstone`) that
+stores all other Terraform state, encrypted.
+
+---
+
+## Stage 2 — Project 1 Infrastructure
+
+```bash
+cd ../terraform
+terraform init
+terraform apply
+```
+Type `yes` when prompted. Creates, in order: VPC, subnets, Internet
+Gateway, NAT Gateway, route tables, security groups, RDS, ECR (both
+repos), IAM roles, ECS cluster/task definition/service, ALB, and the
+GitHub Actions OIDC provider/role.
+
+**~15-20 minutes** — RDS and the NAT Gateway are the slowest parts.
+
+---
+
+## Stage 3 — Get the Website Live (two options)
+
+### Option A — automatic, via the CI/CD pipeline (recommended)
+
+Since the pipeline authenticates via OIDC and the ECS/ECR resources now
+exist again with matching names, just push to `main`:
+```bash
+git commit --allow-empty -m "trigger deploy"
+git push
+```
+Watch it run in GitHub → Actions tab. It lints, builds, scans, pushes to
+ECR, and deploys to ECS automatically — no manual Docker commands needed.
+
+### Option B — manual (if you want to push a specific image immediately)
+
+```bash
+$password = aws ecr get-login-password --region eu-north-1
+docker login --username AWS --password $password 159989389228.dkr.ecr.eu-north-1.amazonaws.com
+
+docker build --build-arg REACT_APP_API_URL=http://localhost:8080 -t eta-web .
+docker tag eta-web:latest 159989389228.dkr.ecr.eu-north-1.amazonaws.com/capstone-website:latest
+docker push 159989389228.dkr.ecr.eu-north-1.amazonaws.com/capstone-website:latest
+```
+ECS will pick up the new image automatically within a minute or two.
+
+---
+
+## Stage 4 — Verify Project 1
+
+```bash
+# Confirm task is running
+aws ecs list-tasks --cluster capstone-cluster
+aws ecs describe-tasks --cluster capstone-cluster --tasks <TASK_ARN> \
+  --query "tasks[0].{lastStatus:lastStatus,healthStatus:healthStatus}"
+
+# Confirm ALB sees a healthy target
+aws elbv2 describe-target-health --target-group-arn $(aws elbv2 describe-target-groups --names capstone-website-tg --query "TargetGroups[0].TargetGroupArn" --output text)
+
+# Get the site URL
+aws elbv2 describe-load-balancers --names capstone-alb --query "LoadBalancers[0].DNSName" --output text
+```
+Open the returned URL in a browser — confirm the homepage loads, then
+navigate to a deep route (e.g. `/blog`) and hit F5 to confirm the SPA
+fallback still works live.
+
+---
+
+## Stage 5 — Project 2: EKS Cluster
+
+```bash
+cd ../backend_project2/terraform
+terraform init
+terraform apply --auto-approve
+```
+Creates the EKS cluster, managed node group (2× `t3.small`), OIDC
+provider for IRSA, and the security group rule bridging EKS nodes to
+Project 1's RDS on port 5432.
+
+**~10-20 minutes** — the node group is the slowest part; if it fails on
+`Unhealthy nodes`, see the troubleshooting note at the bottom of this file.
+
+---
+
+## Stage 6 — Connect kubectl and Confirm Nodes
+
+```bash
+aws eks update-kubeconfig --region eu-north-1 --name capstone-eks
+kubectl get nodes
+```
+Confirm 2 nodes, both `STATUS: Ready`.
+
+---
+
