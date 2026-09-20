@@ -163,12 +163,14 @@ confirm that Docker file and nginx configuration worked correctly using http://1
 
 **Homepage loading locally via Docker:**
 
-![Local website running in Docker](assets/03-local-docker-website-running.png)
+<img width="1330" height="662" alt="image" src="https://github.com/user-attachments/assets/7e8b31d1-f12c-4853-9f12-601f119512b6" />
+)
 
 **Deep-route refresh test (`/courses`), confirming nginx's `try_files`
 fallback works — no 404 on hard refresh:**
 
-![Local deep route refresh](assets/04-local-deep-route-refresh.png)
+<img width="1245" height="686" alt="image" src="https://github.com/user-attachments/assets/6a4b1003-6ae8-4755-af0f-e24589724733" />
+
 
 ---
 
@@ -213,7 +215,9 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "mybucket" {
 
 **Bootstrap `terraform apply` — S3 bucket created:**
 
-![Terraform apply S3 bucket](assets/05-terraform-apply-s3-bucket.png)
+<img width="1206" height="393" alt="image" src="https://github.com/user-attachments/assets/3c6ba728-4229-45ac-9382-cbe214965485" />
+
+
 
 ---
 
@@ -233,7 +237,8 @@ Built in dependency order in `terraform/resources.tf`:
 
 **VPC `terraform apply`:**
 
-![VPC terraform apply](assets/06-vpc-terraform-apply.png)
+<img width="1108" height="665" alt="image" src="https://github.com/user-attachments/assets/b626a694-d660-4b33-8ef2-68cc8f51b1d4" />
+
 
 ---
 
@@ -262,7 +267,8 @@ Built in dependency order in `terraform/resources.tf`:
 
 **`terraform apply` creating the ALB and connecting it to the ECS service:**
 
-![ECS service and ALB apply](assets/07-ecs-service-alb-apply.png)
+<img width="1219" height="638" alt="image" src="https://github.com/user-attachments/assets/d631abf0-1d7f-4880-8984-1c58fcef4477" />
+
 
 ---
 
@@ -272,7 +278,8 @@ With infrastructure up but ECR still empty, the ALB correctly returned a
 `503 Service Temporarily Unavailable` — confirming the ALB, security groups,
 and networking were wired correctly, with no healthy target yet.
 
-![503 before image push](assets/08-alb-503-before-image-push.png)
+<img width="812" height="204" alt="image" src="https://github.com/user-attachments/assets/47122ab9-17f2-4559-a6c0-d4f8422d2643" />
+
 
 ---
 
@@ -293,7 +300,8 @@ target group reported the task as `healthy`.
 (`http://capstone-alb-865717118.eu-north-1.elb.amazonaws.com/blog`),
 confirming nginx's fallback works in production, not just locally:**
 
-![Live website deep route](assets/09-live-website-deep-route.png)
+<img width="886" height="445" alt="image" src="https://github.com/user-attachments/assets/eedbaa3b-caf2-4505-8955-7243cb356817" />
+
 
 ---
 
@@ -324,7 +332,8 @@ definition revision on every push to `main`.
 
 **Pipeline running (lint, install, build steps passing):**
 
-![GitHub Actions pipeline running](assets/10-github-actions-pipeline-running.png)
+<img width="1308" height="683" alt="image" src="https://github.com/user-attachments/assets/bd397faf-78b9-4670-a712-a2b637fcfc22" />
+
 
 ### Known issue — OIDC authentication
 
@@ -335,7 +344,8 @@ Error: Could not assume role with OIDC: Not authorized to perform sts:AssumeRole
 
 **Full CI/CD pipeline, all four stages green, OIDC authentication working:**
 
-![CI/CD pipeline success](assets/04-cicd-pipeline-success.png)
+<img width="1248" height="508" alt="image" src="https://github.com/user-attachments/assets/6430ab50-22df-47f0-97cf-9d7b27e34148" />
+
 
 The OIDC step initially failed repeatedly with
 `Not authorized to perform sts:AssumeRoleWithWebIdentity`, despite the
@@ -350,7 +360,7 @@ and the error message pointed at the trust step rather than the actual gap.
 
 ---
 
-## Project 2 — EKS with Terraform (40%)
+## Project 2 — EKS with Terraform 
 
 ### Architecture
 
@@ -384,9 +394,11 @@ repeatedly failed with `Unhealthy nodes in the kubernetes cluster`.
 
 **Amazon Q's diagnosis, run against the live cluster:**
 
-![EKS node health issue](assets/05-eks-node-health-cni-error.png)
+<img width="1359" height="560" alt="image" src="https://github.com/user-attachments/assets/9d045a03-e0df-472b-82d3-00a64b7c8795" />
 
-![Amazon Q root cause analysis](assets/06-amazon-q-diagnosis.jpeg)
+
+<img width="1346" height="564" alt="image" src="https://github.com/user-attachments/assets/8c753930-cfb3-4066-812b-ea09c567663d" />
+
 
 Root cause: the AWS VPC CNI plugin (`aws-node` DaemonSet) was never
 actually running on the nodes, despite Terraform's `addons` block
@@ -416,9 +428,10 @@ absent) rather than leaving it as an unresolved hypothesis.
 **Live application counting real visits against the Project 1 RDS
 instance:**
 
-![Visit counter live](assets/07-visit-counter-live.png)
+<img width="1263" height="587" alt="image" src="https://github.com/user-attachments/assets/c137687b-630e-4616-9ff3-63f777a8422e" />
 
-Refreshing the page increases the count on each load — direct proof the
+
+Refreshing the page increases the count on each load direct proof the
 pod is writing to and reading from RDS on every request.
 
 **Application logs confirming successful database connection:**
@@ -426,12 +439,17 @@ pod is writing to and reading from RDS on every request.
 listening on 3000
 Table check/create succeeded
 ```
+<img width="1366" height="639" alt="image" src="https://github.com/user-attachments/assets/39b68f9f-332b-4833-a874-5ae789dc26f1" />
 
-**Clean teardown after verification, to control cost:**
 
-![EKS destroy complete](assets/08-eks-destroy-complete.png)
+<img width="1263" height="450" alt="image" src="https://github.com/user-attachments/assets/aa56627c-1945-442a-861b-ad4c1b13ba2e" />
+
 
 ---
+
+
+## Destroyed
+
 
 ## Repository Structure
 
