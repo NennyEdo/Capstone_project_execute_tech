@@ -357,6 +357,10 @@ resource "aws_ecs_service" "website" {
   }
 
   depends_on = [aws_lb_listener.http]
+
+  lifecycle {
+    ignore_changes = [task_definition]
+  }
 }
 
 # APPLICATION LOAD BALANCER

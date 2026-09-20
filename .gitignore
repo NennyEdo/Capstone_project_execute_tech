@@ -12,3 +12,6 @@ crash.log
 # Windows
 *.exe
 *.msi
+
+tfplan
+backend_project2/k8s/secret.yaml
